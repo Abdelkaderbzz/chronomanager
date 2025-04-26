@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" fill="none">
+  <rect width="1200" height="630" fill="#171717"/>
+  <text x="600" y="350" font-family="Inter, sans-serif" font-size="80" font-weight="bold" fill="white" text-anchor="middle">ChronoManager</text>
+  <text x="600" y="430" font-family="Inter, sans-serif" font-size="40" fill="#a1a1aa" text-anchor="middle">Task Management Made Simple</text>
+  <path fill="#ffffff" fill-rule="evenodd" d="M400 470l120-210l-30-18L340 470H400Z" clip-rule="evenodd"/>
+  <path fill="#ffffff" fill-rule="evenodd" d="M460 470H600L514 333l-30 52l30 51H460L430 470Z" clip-rule="evenodd"/>
+</svg> 
