@@ -11,7 +11,7 @@ interface AppHeaderProps {
 export default function AppHeader({ className }: AppHeaderProps) {
   return (
     <header className={cn('border-b px-6 py-3', className)}>
-      <div className='max-w-7xl mx-auto flex items-center justify-between'>
+      <div className='max-w-7xl flex items-center justify-between'>
         <Link href='/' className='flex items-center space-x-2'>
           <div className='relative h-8 w-8'>
             <svg
