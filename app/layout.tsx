@@ -2,6 +2,7 @@ import type React from 'react';
 import '@/app/globals.css';
 import { Inter } from 'next/font/google';
 import { Toaster } from '@/components/ui/toaster';
+import Script from 'next/script';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -71,6 +72,18 @@ export default function RootLayout({
       <body className={inter.className}>
         {children}
         <Toaster />
+        <Script id='feeduser-widget' strategy='afterInteractive'>
+          {`
+            window.Fu = window.Fu || {};
+            Fu.access_token = "c73c052759e3602ca716ff469cde44";
+            (function (d) {
+              const s = d.createElement("script");
+              s.async = true;
+              s.src = "https://widget.feeduser.me/widget/v1.js";
+              (d.head || d.body).appendChild(s);
+            })(document);
+          `}
+        </Script>
       </body>
     </html>
   );
