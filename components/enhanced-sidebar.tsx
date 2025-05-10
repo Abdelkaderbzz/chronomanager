@@ -84,11 +84,11 @@ export default function EnhancedSidebar({
 }: EnhancedSidebarProps) {
   const isMobile = useMediaQuery("(max-width: 768px)")
   const [newFolder, setNewFolder] = useState({
-    name: "",
-    icon: "📁",
-    color: "#3b82f6",
+    name: '',
+    icon: '',
+    color: '#3b82f6',
     isFavorite: false,
-  })
+  });
   const [editingFolder, setEditingFolder] = useState<FolderType | null>(null)
   const [folderToDelete, setFolderToDelete] = useState<string | null>(null)
   const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({})
@@ -106,11 +106,11 @@ export default function EnhancedSidebar({
     if (newFolder.name.trim() === "") return
     onCreateFolder(newFolder)
     setNewFolder({
-      name: "",
-      icon: "📁",
-      color: "#3b82f6",
+      name: '',
+      icon: '',
+      color: '#3b82f6',
       isFavorite: false,
-    })
+    });
   }
 
   const handleUpdateFolder = () => {
@@ -292,15 +292,6 @@ export default function EnhancedSidebar({
                       value={newFolder.name}
                       onChange={(e) => setNewFolder({ ...newFolder, name: e.target.value })}
                       placeholder="e.g., Work, Personal, Projects"
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="folderIcon">Icon/Emoji</Label>
-                    <Input
-                      id="folderIcon"
-                      value={newFolder.icon}
-                      onChange={(e) => setNewFolder({ ...newFolder, icon: e.target.value })}
-                      placeholder="e.g., 📁, 💼, 🏠"
                     />
                   </div>
                   <div className="grid gap-2">
