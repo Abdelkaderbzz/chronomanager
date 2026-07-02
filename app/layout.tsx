@@ -80,7 +80,10 @@ export default function RootLayout({
         />
         <link rel='apple-touch-icon' href='/icons/apple-touch-icon.svg' />
       </head>
-      <body className={`${syne.variable} ${dmSans.variable} font-body antialiased`}>
+      <body
+        className={`${syne.variable} ${dmSans.variable} font-body antialiased`}
+        suppressHydrationWarning
+      >
         <ThemeProvider
           attribute='class'
           defaultTheme='light'

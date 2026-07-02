@@ -13,7 +13,12 @@ interface AppHeaderProps {
 
 export default function AppHeader({ className, children }: AppHeaderProps) {
   const [scrolled, setScrolled] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [timeString, setTimeString] = useState('');
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -73,7 +78,9 @@ export default function AppHeader({ className, children }: AppHeaderProps) {
 
           <div className='hidden md:flex items-center space-x-1 px-3 py-1.5 rounded-full bg-muted text-muted-foreground'>
             <Clock className='h-3.5 w-3.5 mr-1 text-amber-500' />
-            <span className='text-sm font-medium tabular-nums'>{timeString}</span>
+            <span className='text-sm font-medium tabular-nums' suppressHydrationWarning>
+              {mounted ? timeString : '--:--'}
+            </span>
           </div>
 
           <ThemeToggle />

@@ -17,21 +17,18 @@ import {
 import { Button } from '@/components/ui/button';
 
 function LiveClock() {
+  const [mounted, setMounted] = useState(false);
   const [now, setNow] = useState<Date | null>(null);
 
   useEffect(() => {
+    setMounted(true);
     setNow(new Date());
     const id = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(id);
   }, []);
 
-  if (!now) {
-    return (
-      <div className='flex flex-col items-center justify-center gap-1 min-h-[72px]'>
-        <div className='h-8 w-28 rounded bg-zinc-800/60 animate-pulse' />
-        <div className='h-3 w-36 rounded bg-zinc-800/40 animate-pulse' />
-      </div>
-    );
+  if (!mounted || !now) {
+    return <ClockPlaceholder />;
   }
 
   const hours = now.getHours() % 12;
@@ -98,12 +95,34 @@ function LiveClock() {
 
       {/* Digital readout — outside the dial so nothing clips */}
       <div className='text-center space-y-1'>
-        <div className='font-mono text-2xl md:text-3xl font-medium text-amber-400 tabular-nums tracking-wide'>
+        <div
+          className='font-mono text-2xl md:text-3xl font-medium text-amber-400 tabular-nums tracking-wide'
+          suppressHydrationWarning
+        >
           {timeLabel}
         </div>
-        <div className='text-xs text-zinc-500 tracking-widest uppercase'>
+        <div
+          className='text-xs text-zinc-500 tracking-widest uppercase'
+          suppressHydrationWarning
+        >
           {dateLabel}
         </div>
+      </div>
+    </div>
+  );
+}
+
+function ClockPlaceholder() {
+  return (
+    <div className='flex flex-col items-center gap-5'>
+      <div className='relative w-52 h-52 md:w-56 md:h-56'>
+        <div className='absolute inset-0 rounded-full bg-[#12121a] border border-zinc-700/80 animate-pulse' />
+        <div className='absolute -inset-6 rounded-full border border-dashed border-amber-400/10 pointer-events-none' />
+        <div className='absolute -inset-12 rounded-full border border-dashed border-teal-400/10 pointer-events-none' />
+      </div>
+      <div className='text-center space-y-1'>
+        <div className='h-8 w-28 rounded bg-zinc-800/60 animate-pulse mx-auto' />
+        <div className='h-3 w-36 rounded bg-zinc-800/40 animate-pulse mx-auto' />
       </div>
     </div>
   );
@@ -149,6 +168,20 @@ function OrbitTask({
 }
 
 function HeroClockVisual() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <div className='relative flex items-center justify-center w-full max-w-[420px] mx-auto aspect-square'>
+        <ClockPlaceholder />
+      </div>
+    );
+  }
+
   return (
     <div className='relative flex items-center justify-center w-full max-w-[420px] mx-auto aspect-square'>
       {/* Soft glow behind */}
@@ -222,6 +255,7 @@ export default function LandingPage() {
       {/* Grain overlay */}
       <div
         className='fixed inset-0 pointer-events-none z-50 opacity-[0.035]'
+        suppressHydrationWarning
         style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
         }}
@@ -276,7 +310,7 @@ export default function LandingPage() {
       <section className='relative z-10 px-6 md:px-12 pt-12 pb-24 max-w-7xl mx-auto'>
         <div className='grid lg:grid-cols-2 gap-12 lg:gap-8 items-center'>
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           >
@@ -338,7 +372,7 @@ export default function LandingPage() {
 
           {/* Clock visual */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={false}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
             className='relative flex items-center justify-center min-h-[420px] lg:min-h-[480px]'
