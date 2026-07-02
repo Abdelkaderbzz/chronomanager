@@ -32,6 +32,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
+  CalendarDays,
   ChevronDown,
   ChevronRight,
   FolderPlus,
@@ -44,24 +45,31 @@ import {
   StarOff,
   Folder,
   FolderOpen,
+  Timer,
+  Sprout,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 import type { Folder as FolderType, List } from '@/types/types';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { TouchBackend } from 'react-dnd-touch-backend';
 import { useMediaQuery } from '@/hooks/use-media-query';
+import { usePomodoro } from '@/hooks/use-pomodoro';
 
 interface EnhancedSidebarProps {
   folders: FolderType[];
   activeFolder: string | null;
   activeList: string | null;
+  appView: 'list' | 'today';
+  todayCounts: { overdue: number; dueToday: number; dueThisWeek: number };
   onCreateFolder: (folder: Omit<FolderType, 'id' | 'lists'>) => void;
   onUpdateFolder: (folder: FolderType) => void;
   onDeleteFolder: (folderId: string) => void;
   onCreateList: (folderId: string, list: Omit<List, 'id' | 'tasks'>) => void;
   onSelectFolder: (folderId: string | null) => void;
   onSelectList: (listId: string | null) => void;
+  onSelectToday: () => void;
   onReorderFolders: (folders: FolderType[]) => void;
   onReorderLists: (folderId: string, lists: List[]) => void;
   onFavoriteFolder: (folderId: string, isFavorite: boolean) => void;
@@ -78,12 +86,15 @@ export default function EnhancedSidebar({
   folders,
   activeFolder,
   activeList,
+  appView,
+  todayCounts,
   onCreateFolder,
   onUpdateFolder,
   onDeleteFolder,
   onCreateList,
   onSelectFolder,
   onSelectList,
+  onSelectToday,
   onReorderFolders,
   onReorderLists,
   onFavoriteFolder,
@@ -114,6 +125,7 @@ export default function EnhancedSidebar({
   );
   const [newTag, setNewTag] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const { currentPlant, totalSessions, setPanelOpen } = usePomodoro();
 
   const handleCreateFolder = () => {
     if (newFolder.name.trim() === '') return;
@@ -369,6 +381,57 @@ export default function EnhancedSidebar({
               </DialogContent>
             </Dialog>
           </div>
+
+          <div className='flex gap-1'>
+            <Button
+              variant={appView === 'today' ? 'secondary' : 'outline'}
+              size='sm'
+              className='flex-1 justify-start gap-2 h-8 text-xs'
+              onClick={onSelectToday}
+            >
+              <CalendarDays className='h-3.5 w-3.5 text-primary' />
+              Today
+              {todayCounts.overdue + todayCounts.dueToday > 0 ? (
+                <span
+                  className={cn(
+                    'ml-auto rounded-full px-1.5 py-0.5 text-[10px] font-medium',
+                    todayCounts.overdue > 0
+                      ? 'bg-destructive/15 text-destructive'
+                      : 'bg-primary/15 text-primary'
+                  )}
+                >
+                  {todayCounts.overdue > 0
+                    ? todayCounts.overdue
+                    : todayCounts.dueToday}
+                </span>
+              ) : null}
+            </Button>
+          </div>
+
+          <div className='flex gap-1'>
+            <Link href='/app/focus' className='flex-1'>
+              <Button
+                variant='outline'
+                size='sm'
+                className='w-full justify-start gap-2 h-8 text-xs border-amber-400/20 bg-amber-400/5 hover:bg-amber-400/10'
+              >
+                <Sprout className='h-3.5 w-3.5 text-amber-500' />
+                Focus Garden
+              </Button>
+            </Link>
+            <Button
+              variant='outline'
+              size='sm'
+              className='h-8 px-2 border-amber-400/20'
+              onClick={() => setPanelOpen(true)}
+              title='Open pomodoro timer'
+            >
+              <Timer className='h-3.5 w-3.5 text-amber-500' />
+            </Button>
+          </div>
+          <p className='text-[10px] text-muted-foreground px-1 capitalize'>
+            {currentPlant.stage} · {totalSessions} sessions
+          </p>
         </div>
 
         <ScrollArea className='flex-1 p-2'>
@@ -384,10 +447,16 @@ export default function EnhancedSidebar({
               {favoriteFolders.map((folder) => (
                 <Button
                   key={`fav-folder-${folder.id}`}
-                  variant={activeFolder === folder.id ? 'secondary' : 'ghost'}
+                  variant={
+                    appView === 'list' && activeFolder === folder.id
+                      ? 'secondary'
+                      : 'ghost'
+                  }
                   className={cn(
                     'justify-start w-full h-8 px-2 font-normal ml-2',
-                    activeFolder === folder.id && 'font-medium'
+                    appView === 'list' &&
+                      activeFolder === folder.id &&
+                      'font-medium'
                   )}
                   onClick={() => handleSelectFolder(folder.id)}
                 >
@@ -402,10 +471,14 @@ export default function EnhancedSidebar({
               {favoriteLists.map((list) => (
                 <Button
                   key={`fav-list-${list.id}`}
-                  variant={activeList === list.id ? 'secondary' : 'ghost'}
+                  variant={
+                    appView === 'list' && activeList === list.id
+                      ? 'secondary'
+                      : 'ghost'
+                  }
                   className={cn(
                     'justify-start w-full h-8 px-2 font-normal ml-2',
-                    activeList === list.id && 'font-medium'
+                    appView === 'list' && activeList === list.id && 'font-medium'
                   )}
                   onClick={() => handleSelectList(list.id)}
                 >
@@ -434,9 +507,10 @@ export default function EnhancedSidebar({
                   key={folder.id}
                   folder={folder}
                   index={index}
-                  isActive={activeFolder === folder.id}
+                  isActive={appView === 'list' && activeFolder === folder.id}
                   isExpanded={!!expandedFolders[folder.id]}
                   activeList={activeList}
+                  appView={appView}
                   onToggleExpand={() => toggleFolderExpand(folder.id)}
                   onSelectFolder={() => handleSelectFolder(folder.id)}
                   onSelectList={handleSelectList}
@@ -676,6 +750,7 @@ interface FolderItemProps {
   isActive: boolean;
   isExpanded: boolean;
   activeList: string | null;
+  appView: 'list' | 'today';
   onToggleExpand: () => void;
   onSelectFolder: () => void;
   onSelectList: (listId: string) => void;
@@ -694,6 +769,7 @@ function FolderItem({
   isActive,
   isExpanded,
   activeList,
+  appView,
   onToggleExpand,
   onSelectFolder,
   onSelectList,
@@ -842,7 +918,7 @@ function FolderItem({
                 key={list.id}
                 list={list}
                 index={listIndex}
-                isActive={activeList === list.id}
+                isActive={appView === 'list' && activeList === list.id}
                 onSelectList={() => onSelectList(list.id)}
                 onFavoriteList={(isFavorite) =>
                   onFavoriteList(list.id, isFavorite)
