@@ -74,6 +74,27 @@ export const PLANT_STAGE_THRESHOLDS: Record<PlantStage, number> = {
   bloom: 15,
 };
 
+export const PLANT_STAGE_LABELS: Record<
+  PlantStage,
+  { label: string; emoji: string }
+> = {
+  seed: { label: 'Seed', emoji: '🌰' },
+  sprout: { label: 'Sprout', emoji: '🌱' },
+  sapling: { label: 'Sapling', emoji: '🪴' },
+  young: { label: 'Young tree', emoji: '🌿' },
+  mature: { label: 'Mature tree', emoji: '🌳' },
+  bloom: { label: 'Full bloom', emoji: '🌸' },
+};
+
+const STAGE_ORDER: PlantStage[] = [
+  'seed',
+  'sprout',
+  'sapling',
+  'young',
+  'mature',
+  'bloom',
+];
+
 export function getPlantStage(growthPoints: number): PlantStage {
   if (growthPoints >= PLANT_STAGE_THRESHOLDS.bloom) return 'bloom';
   if (growthPoints >= PLANT_STAGE_THRESHOLDS.mature) return 'mature';
@@ -81,6 +102,56 @@ export function getPlantStage(growthPoints: number): PlantStage {
   if (growthPoints >= PLANT_STAGE_THRESHOLDS.sapling) return 'sapling';
   if (growthPoints >= PLANT_STAGE_THRESHOLDS.sprout) return 'sprout';
   return 'seed';
+}
+
+export function getNextStageProgress(growthPoints: number): {
+  current: PlantStage;
+  next: PlantStage | null;
+  progress: number;
+  remaining: number;
+} {
+  const current = getPlantStage(growthPoints);
+  const currentIndex = STAGE_ORDER.indexOf(current);
+  const next = STAGE_ORDER[currentIndex + 1] ?? null;
+
+  if (!next) {
+    return { current, next: null, progress: 100, remaining: 0 };
+  }
+
+  const currentThreshold = PLANT_STAGE_THRESHOLDS[current];
+  const nextThreshold = PLANT_STAGE_THRESHOLDS[next];
+  const progress = Math.round(
+    ((growthPoints - currentThreshold) / (nextThreshold - currentThreshold)) * 100
+  );
+  const remaining = nextThreshold - growthPoints;
+
+  return { current, next, progress: Math.min(100, Math.max(0, progress)), remaining };
+}
+
+/** Visual metrics that grow smoothly with every pomodoro session */
+export function getPlantVisualMetrics(growthPoints: number) {
+  const stage = getPlantStage(growthPoints);
+  const stemH = growthPoints === 0 ? 0 : Math.min(8 + growthPoints * 4.8, 78);
+  const leafCount = growthPoints === 0 ? 0 : Math.min(2 + Math.floor(growthPoints * 1.2), 14);
+  const branchCount = Math.max(0, Math.min(Math.floor((growthPoints - 3) / 2), 4));
+  const flowerPetals =
+    growthPoints >= PLANT_STAGE_THRESHOLDS.bloom
+      ? 8
+      : growthPoints >= 12
+        ? 4 + (growthPoints - 12)
+        : 0;
+  const glow = Math.min(growthPoints / PLANT_STAGE_THRESHOLDS.bloom, 1);
+  const scale = 0.62 + Math.min(growthPoints * 0.045, 0.85);
+  const leafColor =
+    growthPoints >= PLANT_STAGE_THRESHOLDS.mature
+      ? '#059669'
+      : growthPoints >= PLANT_STAGE_THRESHOLDS.young
+        ? '#16a34a'
+        : growthPoints >= PLANT_STAGE_THRESHOLDS.sapling
+          ? '#22c55e'
+          : '#84cc16';
+
+  return { stage, stemH, leafCount, branchCount, flowerPetals, glow, scale, leafColor };
 }
 
 export function createNewPlant(): Plant {

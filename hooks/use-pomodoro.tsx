@@ -15,6 +15,7 @@ import {
   createInitialPomodoroState,
   createNewPlant,
   getPlantStage,
+  PLANT_STAGE_LABELS,
   type LinkedTask,
   type PomodoroPhase,
   type PomodoroPersistedState,
@@ -141,10 +142,11 @@ export function PomodoroProvider({ children }: { children: ReactNode }) {
           description: 'Your focus plant reached full bloom. A new seed has been planted.',
         });
       } else {
+        const stageInfo = PLANT_STAGE_LABELS[newStage];
         confetti({ particleCount: 60, spread: 50, origin: { y: 0.7 } });
         toast({
-          title: '🌱 Focus session complete!',
-          description: `Your plant grew to ${newStage.replace('-', ' ')}.`,
+          title: `${stageInfo.emoji} Focus session complete!`,
+          description: `Your plant grew — now a ${stageInfo.label.toLowerCase()} (${newGrowth} pomodoros).`,
         });
       }
 

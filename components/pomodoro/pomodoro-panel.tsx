@@ -7,7 +7,8 @@ import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { usePomodoro } from '@/hooks/use-pomodoro';
-import { GardenRow, PlantVisual } from '@/components/pomodoro/plant-visual';
+import { GardenRow, PlantGrowthBar, PlantVisual } from '@/components/pomodoro/plant-visual';
+import { PLANT_STAGE_LABELS, PLANT_STAGE_THRESHOLDS } from '@/types/pomodoro';
 import {
   Pause,
   Play,
@@ -90,6 +91,8 @@ export function PomodoroPanel({ compact = false }: PomodoroPanelProps) {
               size={compact ? 'md' : 'lg'}
             />
 
+            <PlantGrowthBar growthPoints={currentPlant.growthPoints} />
+
             <div className='text-center space-y-1'>
               <p className={`text-sm font-medium ${phaseColor}`}>
                 {phaseLabels[phase]}
@@ -163,37 +166,54 @@ export function PomodoroPanel({ compact = false }: PomodoroPanelProps) {
         </TabsContent>
 
         <TabsContent value='garden' className='space-y-4 mt-4'>
-          <div className='rounded-xl border bg-muted/30 p-4 text-center space-y-3'>
+          <div className='rounded-xl border bg-gradient-to-b from-emerald-500/5 to-amber-400/5 p-5 text-center space-y-4'>
             <p className='text-sm font-medium'>Current plant</p>
             <PlantVisual
               stage={currentPlant.stage}
               growthPoints={currentPlant.growthPoints}
-              size='md'
+              size='lg'
             />
-            <p className='text-xs text-muted-foreground'>
-              Complete focus sessions to help your plant grow from seed to bloom.
+            <PlantGrowthBar growthPoints={currentPlant.growthPoints} />
+            <p className='text-xs text-muted-foreground max-w-xs mx-auto'>
+              Every completed pomodoro adds leaves, height, and color. Reach 15 sessions for full bloom — then your plant moves to the garden below.
             </p>
           </div>
 
-          {garden.length > 0 && (
-            <div className='space-y-2'>
-              <p className='text-sm font-medium text-center'>Your garden ({garden.length})</p>
+          {garden.length > 0 ? (
+            <div className='space-y-3'>
+              <p className='text-sm font-medium text-center'>
+                🏡 Your garden — {garden.length} bloomed plant{garden.length === 1 ? '' : 's'}
+              </p>
               <GardenRow plants={garden} />
+            </div>
+          ) : (
+            <div className='rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground'>
+              Complete 15 pomodoros to bloom your first plant and start your garden.
             </div>
           )}
 
-          <div className='grid grid-cols-2 gap-2 text-center text-xs'>
+          <div className='grid grid-cols-3 gap-2 text-center text-xs'>
             {(['seed', 'sprout', 'sapling', 'young', 'mature', 'bloom'] as const).map(
-              (s) => (
-                <div
-                  key={s}
-                  className={`rounded-lg border p-2 capitalize ${
-                    currentPlant.stage === s ? 'border-amber-400/50 bg-amber-400/5' : ''
-                  }`}
-                >
-                  {s}
-                </div>
-              )
+              (s) => {
+                const info = PLANT_STAGE_LABELS[s];
+                const reached =
+                  currentPlant.growthPoints >= PLANT_STAGE_THRESHOLDS[s];
+                return (
+                  <div
+                    key={s}
+                    className={`rounded-lg border p-2 transition-colors ${
+                      currentPlant.stage === s
+                        ? 'border-amber-400/60 bg-amber-400/10 ring-1 ring-amber-400/30'
+                        : reached
+                          ? 'border-emerald-500/30 bg-emerald-500/5 opacity-80'
+                          : 'opacity-40'
+                    }`}
+                  >
+                    <span className='text-base block'>{info.emoji}</span>
+                    <span className='capitalize'>{info.label}</span>
+                  </div>
+                );
+              }
             )}
           </div>
         </TabsContent>
