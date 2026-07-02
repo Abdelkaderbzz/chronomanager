@@ -17,70 +17,150 @@ import {
 import { Button } from '@/components/ui/button';
 
 function LiveClock() {
-  const [time, setTime] = useState('');
-  const [date, setDate] = useState('');
+  const [now, setNow] = useState<Date | null>(null);
 
   useEffect(() => {
-    const tick = () => {
-      const now = new Date();
-      setTime(
-        now.toLocaleTimeString([], {
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-        })
-      );
-      setDate(
-        now.toLocaleDateString([], {
-          weekday: 'long',
-          month: 'long',
-          day: 'numeric',
-        })
-      );
-    };
-    tick();
-    const id = setInterval(tick, 1000);
+    setNow(new Date());
+    const id = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(id);
   }, []);
 
-  return (
-    <div className='font-mono text-right'>
-      <div className='text-3xl md:text-4xl font-light tracking-widest text-amber-400 tabular-nums'>
-        {time}
+  if (!now) {
+    return (
+      <div className='flex flex-col items-center justify-center gap-1 min-h-[72px]'>
+        <div className='h-8 w-28 rounded bg-zinc-800/60 animate-pulse' />
+        <div className='h-3 w-36 rounded bg-zinc-800/40 animate-pulse' />
       </div>
-      <div className='text-xs text-zinc-500 mt-1 tracking-wide uppercase'>
-        {date}
+    );
+  }
+
+  const hours = now.getHours() % 12;
+  const minutes = now.getMinutes();
+  const seconds = now.getSeconds();
+
+  const secondAngle = seconds * 6;
+  const minuteAngle = minutes * 6 + seconds * 0.1;
+  const hourAngle = hours * 30 + minutes * 0.5;
+
+  const timeLabel = now.toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
+  const dateLabel = now.toLocaleDateString([], {
+    weekday: 'long',
+    month: 'short',
+    day: 'numeric',
+  });
+
+  return (
+    <div className='flex flex-col items-center gap-5'>
+      {/* Analog clock */}
+      <div className='relative w-52 h-52 md:w-56 md:h-56'>
+        <div className='absolute inset-0 rounded-full bg-[#12121a] border border-zinc-700/80 shadow-2xl shadow-amber-400/10'>
+          <div className='absolute inset-0 rounded-full bg-gradient-to-br from-amber-400/8 via-transparent to-teal-400/5' />
+
+          {/* Hour markers */}
+          {Array.from({ length: 12 }).map((_, i) => (
+            <div
+              key={i}
+              className='absolute left-1/2 top-1/2 h-[88px] w-0 origin-bottom'
+              style={{ transform: `rotate(${i * 30}deg)` }}
+            >
+              <div
+                className={`mx-auto rounded-full ${i % 3 === 0 ? 'w-1.5 h-1.5 bg-amber-400/80' : 'w-1 h-1 bg-zinc-600'}`}
+              />
+            </div>
+          ))}
+
+          {/* Clock hands */}
+          <div className='absolute inset-0 flex items-center justify-center'>
+            <div
+              className='absolute w-1 h-14 md:h-16 bg-amber-400/90 origin-bottom bottom-1/2 rounded-full shadow-sm'
+              style={{ transform: `rotate(${hourAngle}deg)` }}
+            />
+            <div
+              className='absolute w-0.5 h-[4.5rem] md:h-20 bg-teal-400/80 origin-bottom bottom-1/2 rounded-full'
+              style={{ transform: `rotate(${minuteAngle}deg)` }}
+            />
+            <div
+              className='absolute w-px h-[4.5rem] md:h-20 bg-red-400/70 origin-bottom bottom-1/2 rounded-full'
+              style={{ transform: `rotate(${secondAngle}deg)` }}
+            />
+            <div className='absolute w-3 h-3 rounded-full bg-amber-400 border-2 border-[#12121a] z-10' />
+          </div>
+        </div>
+
+        {/* Orbit rings — static, clearer contrast */}
+        <div className='absolute -inset-6 rounded-full border border-dashed border-amber-400/25 pointer-events-none' />
+        <div className='absolute -inset-12 rounded-full border border-dashed border-teal-400/20 pointer-events-none' />
+      </div>
+
+      {/* Digital readout — outside the dial so nothing clips */}
+      <div className='text-center space-y-1'>
+        <div className='font-mono text-2xl md:text-3xl font-medium text-amber-400 tabular-nums tracking-wide'>
+          {timeLabel}
+        </div>
+        <div className='text-xs text-zinc-500 tracking-widest uppercase'>
+          {dateLabel}
+        </div>
       </div>
     </div>
   );
 }
 
-function OrbitRing({
-  size,
-  duration,
+function OrbitTask({
+  label,
+  angle,
+  radius,
   delay,
-  color,
 }: {
-  size: number;
-  duration: number;
+  label: string;
+  angle: number;
+  radius: number;
   delay: number;
-  color: string;
 }) {
+  const rad = (angle * Math.PI) / 180;
+  const x = Math.cos(rad) * radius;
+  const y = Math.sin(rad) * radius;
+
   return (
-    <motion.div
-      className='absolute rounded-full border border-dashed opacity-30'
-      style={{
-        width: size,
-        height: size,
-        borderColor: color,
-        left: '50%',
-        top: '50%',
-        marginLeft: -size / 2,
-        marginTop: -size / 2,
-      }}
-      animate={{ rotate: 360 }}
-      transition={{ duration, repeat: Infinity, ease: 'linear', delay }}
-    />
+    <div
+      className='absolute left-1/2 top-[42%] z-20'
+      style={{ transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))` }}
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.85 }}
+        animate={{ opacity: 1, scale: 1, y: [0, -5, 0] }}
+        transition={{
+          opacity: { delay, duration: 0.4 },
+          scale: { delay, duration: 0.4 },
+          y: { delay: delay + 0.5, duration: 3, repeat: Infinity, ease: 'easeInOut' },
+        }}
+        className='px-3 py-2 rounded-xl bg-[#12121a]/95 border border-zinc-700/80 text-xs text-zinc-200 backdrop-blur-md shadow-xl whitespace-nowrap'
+      >
+        <div className='flex items-center gap-2'>
+          <div className='w-2 h-2 rounded-full bg-teal-400 shrink-0' />
+          {label}
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+function HeroClockVisual() {
+  return (
+    <div className='relative flex items-center justify-center w-full max-w-[420px] mx-auto aspect-square'>
+      {/* Soft glow behind */}
+      <div className='absolute inset-8 rounded-full bg-amber-400/5 blur-3xl' />
+
+      {/* Task cards — placed on outer ring, away from the dial */}
+      <OrbitTask label='Design review' angle={-130} radius={168} delay={0.3} />
+      <OrbitTask label='Ship feature' angle={-20} radius={175} delay={0.5} />
+      <OrbitTask label='Team sync' angle={170} radius={168} delay={0.7} />
+
+      <LiveClock />
+    </div>
   );
 }
 
@@ -261,54 +341,9 @@ export default function LandingPage() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-            className='relative flex items-center justify-center h-[400px] lg:h-[480px]'
+            className='relative flex items-center justify-center min-h-[420px] lg:min-h-[480px]'
           >
-            <div className='relative w-72 h-72 md:w-80 md:h-80'>
-              <OrbitRing size={320} duration={60} delay={0} color='#f5a623' />
-              <OrbitRing size={260} duration={45} delay={5} color='#00d4aa' />
-              <OrbitRing size={200} duration={30} delay={2} color='#7c6af7' />
-
-              {/* Center clock face */}
-              <div className='absolute inset-0 flex items-center justify-center'>
-                <div className='w-36 h-36 md:w-44 md:h-44 rounded-full bg-[#12121a] border border-zinc-800 shadow-2xl shadow-amber-400/10 flex flex-col items-center justify-center relative overflow-hidden'>
-                  <div className='absolute inset-0 bg-gradient-to-br from-amber-400/5 to-transparent' />
-                  <LiveClock />
-
-                  {/* Clock hands decoration */}
-                  <motion.div
-                    className='absolute w-0.5 h-12 bg-amber-400/60 origin-bottom bottom-1/2 rounded-full'
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 60, repeat: Infinity, ease: 'linear' }}
-                  />
-                  <motion.div
-                    className='absolute w-0.5 h-8 bg-teal-400/60 origin-bottom bottom-1/2 rounded-full'
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 3600, repeat: Infinity, ease: 'linear' }}
-                  />
-                </div>
-              </div>
-
-              {/* Floating task cards */}
-              {[
-                { label: 'Design review', x: -120, y: -60, delay: 0.4 },
-                { label: 'Ship feature', x: 100, y: -80, delay: 0.6 },
-                { label: 'Team sync', x: -100, y: 80, delay: 0.8 },
-              ].map((card) => (
-                <motion.div
-                  key={card.label}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: card.delay, duration: 0.5 }}
-                  className='absolute px-3 py-2 rounded-lg bg-[#12121a]/90 border border-zinc-800 text-xs text-zinc-300 backdrop-blur-sm shadow-lg'
-                  style={{ left: `calc(50% + ${card.x}px)`, top: `calc(50% + ${card.y}px)` }}
-                >
-                  <div className='flex items-center gap-2'>
-                    <div className='w-2 h-2 rounded-full bg-teal-400' />
-                    {card.label}
-                  </div>
-                </motion.div>
-              ))}
-            </div>
+            <HeroClockVisual />
           </motion.div>
         </div>
       </section>
@@ -488,6 +523,14 @@ export default function LandingPage() {
             <Link href='/app' className='hover:text-amber-400 transition-colors'>
               Open App
             </Link>
+            <a
+              href='https://abdelkader.work'
+              target='_blank'
+              rel='noopener noreferrer'
+              className='hover:text-amber-400 transition-colors'
+            >
+              abdelkader.work
+            </a>
             <a
               href='https://github.com/Abdelkaderbzz/taskly/tree/develop'
               target='_blank'
