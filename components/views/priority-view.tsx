@@ -27,6 +27,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import type { List, Task } from "@/types/types"
 import { Plus, Edit, Trash2, Calendar, ArrowUpDown } from "lucide-react"
 import { format } from "date-fns"
+import { TaskFocusButton } from "@/components/pomodoro/task-focus-button"
 
 interface PriorityViewProps {
   folderId: string
@@ -308,6 +309,14 @@ export default function PriorityView({ folderId, list, onCreateTask, onUpdateTas
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
+                        <TaskFocusButton
+                          task={{
+                            taskId: task.id,
+                            taskTitle: task.title,
+                            folderId,
+                            listId: list.id,
+                          }}
+                        />
                         <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setEditingTask(task)}>
                           <Edit className="h-4 w-4" />
                         </Button>

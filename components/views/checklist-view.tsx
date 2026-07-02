@@ -27,6 +27,7 @@ import {
 import type { List, Task } from "@/types/types"
 import { Plus, Edit, Trash2, Calendar } from "lucide-react"
 import { format } from "date-fns"
+import { TaskFocusButton } from "@/components/pomodoro/task-focus-button"
 
 interface ChecklistViewProps {
   folderId: string
@@ -235,6 +236,14 @@ export default function ChecklistView({
                       )}
                     </div>
                     <div className="flex items-center gap-1 shrink-0">
+                      <TaskFocusButton
+                        task={{
+                          taskId: task.id,
+                          taskTitle: task.title,
+                          folderId,
+                          listId: list.id,
+                        }}
+                      />
                       <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setEditingTask(task)}>
                         <Edit className="h-4 w-4" />
                       </Button>

@@ -44,13 +44,17 @@ import {
   StarOff,
   Folder,
   FolderOpen,
+  Timer,
+  Sprout,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 import type { Folder as FolderType, List } from '@/types/types';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { TouchBackend } from 'react-dnd-touch-backend';
 import { useMediaQuery } from '@/hooks/use-media-query';
+import { usePomodoro } from '@/hooks/use-pomodoro';
 
 interface EnhancedSidebarProps {
   folders: FolderType[];
@@ -114,6 +118,7 @@ export default function EnhancedSidebar({
   );
   const [newTag, setNewTag] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const { currentPlant, totalSessions, setPanelOpen } = usePomodoro();
 
   const handleCreateFolder = () => {
     if (newFolder.name.trim() === '') return;
@@ -369,6 +374,31 @@ export default function EnhancedSidebar({
               </DialogContent>
             </Dialog>
           </div>
+
+          <div className='flex gap-1'>
+            <Link href='/app/focus' className='flex-1'>
+              <Button
+                variant='outline'
+                size='sm'
+                className='w-full justify-start gap-2 h-8 text-xs border-amber-400/20 bg-amber-400/5 hover:bg-amber-400/10'
+              >
+                <Sprout className='h-3.5 w-3.5 text-amber-500' />
+                Focus Garden
+              </Button>
+            </Link>
+            <Button
+              variant='outline'
+              size='sm'
+              className='h-8 px-2 border-amber-400/20'
+              onClick={() => setPanelOpen(true)}
+              title='Open pomodoro timer'
+            >
+              <Timer className='h-3.5 w-3.5 text-amber-500' />
+            </Button>
+          </div>
+          <p className='text-[10px] text-muted-foreground px-1 capitalize'>
+            {currentPlant.stage} · {totalSessions} sessions
+          </p>
         </div>
 
         <ScrollArea className='flex-1 p-2'>

@@ -6,6 +6,7 @@ import AppHeader from '@/components/app-header';
 import AnimatedBackground from '@/components/animated-background';
 import { GlobalSearch } from '@/components/global-search';
 import { AppSettings } from '@/components/app-settings';
+import { PomodoroWidget } from '@/components/pomodoro/pomodoro-widget';
 import type { Folder } from '@/types/types';
 
 export default function AppShell() {
@@ -53,6 +54,7 @@ export default function AppShell() {
     <>
       <AnimatedBackground />
       <AppHeader>
+        <PomodoroWidget />
         <GlobalSearch
           folders={folders}
           onSelectTask={handleSelectTask}

@@ -30,6 +30,7 @@ import type { List, Task, Status } from '@/types/types';
 import { Plus, Edit, Trash2, Calendar, GripVertical } from 'lucide-react';
 import { format } from 'date-fns';
 import { useMediaQuery } from '@/hooks/use-media-query';
+import { TaskFocusButton } from '@/components/pomodoro/task-focus-button';
 
 interface KanbanViewProps {
   folderId: string;
@@ -127,6 +128,8 @@ export default function KanbanView({
           return (
             <StatusColumn
               key={status.id}
+              folderId={folderId}
+              listId={list.id}
               index={index}
               status={status}
               tasks={statusTasks}
@@ -366,6 +369,8 @@ export default function KanbanView({
 }
 
 interface StatusColumnProps {
+  folderId: string;
+  listId: string;
   index: number;
   status: Status;
   tasks: Task[];
@@ -380,6 +385,8 @@ interface StatusColumnProps {
 }
 
 function StatusColumn({
+  folderId,
+  listId,
   index,
   status,
   tasks,
@@ -493,6 +500,8 @@ function StatusColumn({
             <TaskCard
               key={task.id}
               task={task}
+              folderId={folderId}
+              listId={listId}
               onEdit={() => setEditingTask(task)}
               onDelete={() => setTaskToDelete(task.id)}
             />
@@ -505,11 +514,13 @@ function StatusColumn({
 
 interface TaskCardProps {
   task: Task;
+  folderId: string;
+  listId: string;
   onEdit: () => void;
   onDelete: () => void;
 }
 
-function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
+function TaskCard({ task, folderId, listId, onEdit, onDelete }: TaskCardProps) {
   const [{ isDragging }, drag] = useDrag({
     type: 'TASK',
     item: { id: task.id },
@@ -544,6 +555,14 @@ function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
       <div className='flex justify-between items-start'>
         <h4 className='font-medium text-sm'>{task.title}</h4>
         <div className='flex gap-1'>
+          <TaskFocusButton
+            task={{
+              taskId: task.id,
+              taskTitle: task.title,
+              folderId,
+              listId,
+            }}
+          />
           <Button
             variant='ghost'
             size='icon'
