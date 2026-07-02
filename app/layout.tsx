@@ -1,15 +1,26 @@
 import type React from 'react';
 import '@/app/globals.css';
-import { Inter } from 'next/font/google';
+import { Syne, DM_Sans } from 'next/font/google';
 import { Toaster } from '@/components/ui/toaster';
+import { ThemeProvider } from '@/components/theme-provider';
 import Script from 'next/script';
 
-const inter = Inter({ subsets: ['latin'] });
+const syne = Syne({
+  subsets: ['latin'],
+  variable: '--font-display',
+  display: 'swap',
+});
+
+const dmSans = DM_Sans({
+  subsets: ['latin'],
+  variable: '--font-body',
+  display: 'swap',
+});
 
 export const metadata = {
-  title: 'ChronoManager - Task Management App',
+  title: 'ChronoManager - Master Your Time, Command Your Tasks',
   description:
-    'An intuitive task management app featuring folders, lists, drag-and-drop, and three powerful views: Kanban, Priority, and List — designed to keep you organized and in control.',
+    'An intuitive task management app featuring folders, lists, drag-and-drop, and three powerful views: Kanban, Priority, and Checklist — designed to keep you organized and in control.',
   keywords: [
     'task management',
     'productivity',
@@ -52,7 +63,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang='en'>
+    <html lang='en' suppressHydrationWarning>
       <head>
         <link rel='icon' href='/favicon.svg' type='image/svg+xml' />
         <link
@@ -69,9 +80,16 @@ export default function RootLayout({
         />
         <link rel='apple-touch-icon' href='/icons/apple-touch-icon.svg' />
       </head>
-      <body className={inter.className}>
-        {children}
-        <Toaster />
+      <body className={`${syne.variable} ${dmSans.variable} font-body antialiased`}>
+        <ThemeProvider
+          attribute='class'
+          defaultTheme='light'
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+          <Toaster />
+        </ThemeProvider>
         <Script id='feeduser-widget' strategy='afterInteractive'>
           {`
             window.Fu = window.Fu || {};

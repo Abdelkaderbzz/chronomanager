@@ -1,15 +1,5 @@
-import FolderListSystem from '@/components/folder-list-system';
-import AppHeader from '@/components/app-header';
-import AnimatedBackground from '@/components/animated-background';
+import LandingPage from '@/components/landing/landing-page';
 
 export default function Home() {
-  return (
-    <>
-      <AnimatedBackground />
-      <AppHeader />
-      <main className='min-h-screen'>
-        <FolderListSystem />
-      </main>
-    </>
-  );
+  return <LandingPage />;
 }
