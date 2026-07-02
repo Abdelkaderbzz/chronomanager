@@ -5,11 +5,20 @@ import { v4 as uuidv4 } from 'uuid';
 import { useToast } from '@/hooks/use-toast';
 import EnhancedSidebar from '@/components/enhanced-sidebar';
 import MainContent from '@/components/main-content';
-import AnimatedBackground from '@/components/animated-background';
 import confetti from 'canvas-confetti';
 import type { Folder, List, Task, ViewType, Status } from '@/types/types';
 
-export default function FolderListSystem() {
+interface FolderListSystemProps {
+  onFoldersChange?: (folders: Folder[]) => void;
+  navTarget?: { folderId: string; listId: string; taskId?: string } | null;
+  onNavTargetHandled?: () => void;
+}
+
+export default function FolderListSystem({
+  onFoldersChange,
+  navTarget,
+  onNavTargetHandled,
+}: FolderListSystemProps = {}) {
   const { toast } = useToast();
   const [folders, setFolders] = useState<Folder[]>([]);
   const [activeFolder, setActiveFolder] = useState<string | null>(null);
@@ -206,6 +215,16 @@ export default function FolderListSystem() {
     }
   }, []);
 
+  // Handle navigation from global search
+  useEffect(() => {
+    if (navTarget) {
+      setActiveFolder(navTarget.folderId);
+      setActiveList(navTarget.listId);
+      setIsMobileMenuOpen(false);
+      onNavTargetHandled?.();
+    }
+  }, [navTarget, onNavTargetHandled]);
+
   // Save data to localStorage whenever it changes
   useEffect(() => {
     if (folders.length > 0) {
@@ -220,6 +239,13 @@ export default function FolderListSystem() {
       localStorage.setItem('activeList', activeList);
     }
   }, [folders, activeFolder, activeList]);
+
+  // Notify parent of folder changes for search/settings
+  useEffect(() => {
+    if (folders.length > 0) {
+      onFoldersChange?.(folders);
+    }
+  }, [folders, onFoldersChange]);
 
   const handleCreateFolder = (newFolder: Omit<Folder, 'id' | 'lists'>) => {
     const folder: Folder = {
@@ -763,8 +789,7 @@ export default function FolderListSystem() {
   };
 
   return (
-    <div className='flex h-screen overflow-hidden'>
-      <AnimatedBackground />
+    <div className='flex h-[calc(100vh-57px)] overflow-hidden'>
 
       <EnhancedSidebar
         folders={folders}
