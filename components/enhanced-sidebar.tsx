@@ -32,6 +32,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
+  CalendarDays,
   ChevronDown,
   ChevronRight,
   FolderPlus,
@@ -60,12 +61,15 @@ interface EnhancedSidebarProps {
   folders: FolderType[];
   activeFolder: string | null;
   activeList: string | null;
+  appView: 'list' | 'today';
+  todayCounts: { overdue: number; dueToday: number; dueThisWeek: number };
   onCreateFolder: (folder: Omit<FolderType, 'id' | 'lists'>) => void;
   onUpdateFolder: (folder: FolderType) => void;
   onDeleteFolder: (folderId: string) => void;
   onCreateList: (folderId: string, list: Omit<List, 'id' | 'tasks'>) => void;
   onSelectFolder: (folderId: string | null) => void;
   onSelectList: (listId: string | null) => void;
+  onSelectToday: () => void;
   onReorderFolders: (folders: FolderType[]) => void;
   onReorderLists: (folderId: string, lists: List[]) => void;
   onFavoriteFolder: (folderId: string, isFavorite: boolean) => void;
@@ -82,12 +86,15 @@ export default function EnhancedSidebar({
   folders,
   activeFolder,
   activeList,
+  appView,
+  todayCounts,
   onCreateFolder,
   onUpdateFolder,
   onDeleteFolder,
   onCreateList,
   onSelectFolder,
   onSelectList,
+  onSelectToday,
   onReorderFolders,
   onReorderLists,
   onFavoriteFolder,
@@ -376,6 +383,32 @@ export default function EnhancedSidebar({
           </div>
 
           <div className='flex gap-1'>
+            <Button
+              variant={appView === 'today' ? 'secondary' : 'outline'}
+              size='sm'
+              className='flex-1 justify-start gap-2 h-8 text-xs'
+              onClick={onSelectToday}
+            >
+              <CalendarDays className='h-3.5 w-3.5 text-primary' />
+              Today
+              {todayCounts.overdue + todayCounts.dueToday > 0 ? (
+                <span
+                  className={cn(
+                    'ml-auto rounded-full px-1.5 py-0.5 text-[10px] font-medium',
+                    todayCounts.overdue > 0
+                      ? 'bg-destructive/15 text-destructive'
+                      : 'bg-primary/15 text-primary'
+                  )}
+                >
+                  {todayCounts.overdue > 0
+                    ? todayCounts.overdue
+                    : todayCounts.dueToday}
+                </span>
+              ) : null}
+            </Button>
+          </div>
+
+          <div className='flex gap-1'>
             <Link href='/app/focus' className='flex-1'>
               <Button
                 variant='outline'
@@ -414,10 +447,16 @@ export default function EnhancedSidebar({
               {favoriteFolders.map((folder) => (
                 <Button
                   key={`fav-folder-${folder.id}`}
-                  variant={activeFolder === folder.id ? 'secondary' : 'ghost'}
+                  variant={
+                    appView === 'list' && activeFolder === folder.id
+                      ? 'secondary'
+                      : 'ghost'
+                  }
                   className={cn(
                     'justify-start w-full h-8 px-2 font-normal ml-2',
-                    activeFolder === folder.id && 'font-medium'
+                    appView === 'list' &&
+                      activeFolder === folder.id &&
+                      'font-medium'
                   )}
                   onClick={() => handleSelectFolder(folder.id)}
                 >
@@ -432,10 +471,14 @@ export default function EnhancedSidebar({
               {favoriteLists.map((list) => (
                 <Button
                   key={`fav-list-${list.id}`}
-                  variant={activeList === list.id ? 'secondary' : 'ghost'}
+                  variant={
+                    appView === 'list' && activeList === list.id
+                      ? 'secondary'
+                      : 'ghost'
+                  }
                   className={cn(
                     'justify-start w-full h-8 px-2 font-normal ml-2',
-                    activeList === list.id && 'font-medium'
+                    appView === 'list' && activeList === list.id && 'font-medium'
                   )}
                   onClick={() => handleSelectList(list.id)}
                 >
@@ -464,9 +507,10 @@ export default function EnhancedSidebar({
                   key={folder.id}
                   folder={folder}
                   index={index}
-                  isActive={activeFolder === folder.id}
+                  isActive={appView === 'list' && activeFolder === folder.id}
                   isExpanded={!!expandedFolders[folder.id]}
                   activeList={activeList}
+                  appView={appView}
                   onToggleExpand={() => toggleFolderExpand(folder.id)}
                   onSelectFolder={() => handleSelectFolder(folder.id)}
                   onSelectList={handleSelectList}
@@ -706,6 +750,7 @@ interface FolderItemProps {
   isActive: boolean;
   isExpanded: boolean;
   activeList: string | null;
+  appView: 'list' | 'today';
   onToggleExpand: () => void;
   onSelectFolder: () => void;
   onSelectList: (listId: string) => void;
@@ -724,6 +769,7 @@ function FolderItem({
   isActive,
   isExpanded,
   activeList,
+  appView,
   onToggleExpand,
   onSelectFolder,
   onSelectList,
@@ -872,7 +918,7 @@ function FolderItem({
                 key={list.id}
                 list={list}
                 index={listIndex}
-                isActive={activeList === list.id}
+                isActive={appView === 'list' && activeList === list.id}
                 onSelectList={() => onSelectList(list.id)}
                 onFavoriteList={(isFavorite) =>
                   onFavoriteList(list.id, isFavorite)

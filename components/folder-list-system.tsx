@@ -5,6 +5,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { useToast } from '@/hooks/use-toast';
 import EnhancedSidebar from '@/components/enhanced-sidebar';
 import MainContent from '@/components/main-content';
+import TodayView from '@/components/views/today-view';
+import { getTodayViewCounts } from '@/lib/task-dates';
 import confetti from 'canvas-confetti';
 import type { Folder, List, Task, ViewType, Status } from '@/types/types';
 
@@ -23,6 +25,7 @@ export default function FolderListSystem({
   const [folders, setFolders] = useState<Folder[]>([]);
   const [activeFolder, setActiveFolder] = useState<string | null>(null);
   const [activeList, setActiveList] = useState<string | null>(null);
+  const [appView, setAppView] = useState<'list' | 'today'>('list');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
 
@@ -31,6 +34,7 @@ export default function FolderListSystem({
     const savedFolders = localStorage.getItem('folders');
     const savedActiveFolder = localStorage.getItem('activeFolder');
     const savedActiveList = localStorage.getItem('activeList');
+    const savedAppView = localStorage.getItem('activeAppView');
 
     if (savedFolders) {
       const parsedFolders = JSON.parse(savedFolders);
@@ -213,11 +217,16 @@ export default function FolderListSystem({
       setActiveFolder(defaultFolders[0].id);
       setActiveList(defaultFolders[0].lists[0].id);
     }
+
+    if (savedAppView === 'today' || savedAppView === 'list') {
+      setAppView(savedAppView);
+    }
   }, []);
 
   // Handle navigation from global search
   useEffect(() => {
     if (navTarget) {
+      setAppView('list');
       setActiveFolder(navTarget.folderId);
       setActiveList(navTarget.listId);
       setIsMobileMenuOpen(false);
@@ -238,7 +247,9 @@ export default function FolderListSystem({
     if (activeList) {
       localStorage.setItem('activeList', activeList);
     }
-  }, [folders, activeFolder, activeList]);
+
+    localStorage.setItem('activeAppView', appView);
+  }, [folders, activeFolder, activeList, appView]);
 
   // Notify parent of folder changes for search/settings
   useEffect(() => {
@@ -788,6 +799,34 @@ export default function FolderListSystem({
     return folder.lists.find((list) => list.id === activeList) || null;
   };
 
+  const todayCounts = getTodayViewCounts(folders);
+
+  const handleSelectFolder = (folderId: string | null) => {
+    setAppView('list');
+    setActiveFolder(folderId);
+  };
+
+  const handleSelectList = (listId: string | null) => {
+    setAppView('list');
+    setActiveList(listId);
+  };
+
+  const handleSelectToday = () => {
+    setAppView('today');
+    setIsMobileMenuOpen(false);
+  };
+
+  const handleNavigateToTask = (
+    folderId: string,
+    listId: string,
+    _taskId: string
+  ) => {
+    setAppView('list');
+    setActiveFolder(folderId);
+    setActiveList(listId);
+    setIsMobileMenuOpen(false);
+  };
+
   return (
     <div className='flex h-[calc(100vh-57px)] overflow-hidden'>
 
@@ -795,12 +834,15 @@ export default function FolderListSystem({
         folders={folders}
         activeFolder={activeFolder}
         activeList={activeList}
+        appView={appView}
+        todayCounts={todayCounts}
         onCreateFolder={handleCreateFolder}
         onUpdateFolder={handleUpdateFolder}
         onDeleteFolder={handleDeleteFolder}
         onCreateList={handleCreateList}
-        onSelectFolder={setActiveFolder}
-        onSelectList={setActiveList}
+        onSelectFolder={handleSelectFolder}
+        onSelectList={handleSelectList}
+        onSelectToday={handleSelectToday}
         onReorderFolders={handleReorderFolders}
         onReorderLists={handleReorderLists}
         onFavoriteFolder={handleFavoriteFolder}
@@ -809,21 +851,30 @@ export default function FolderListSystem({
         setIsMobileMenuOpen={setIsMobileMenuOpen}
       />
 
-      <MainContent
-        folder={getActiveFolder()}
-        list={getActiveList()}
-        onUpdateList={handleUpdateList}
-        onDeleteList={handleDeleteList}
-        onCreateTask={handleCreateTask}
-        onUpdateTask={handleUpdateTask}
-        onDeleteTask={handleDeleteTask}
-        onChangeListView={handleChangeListView}
-        onCreateStatus={handleCreateStatus}
-        onUpdateStatus={handleUpdateStatus}
-        onDeleteStatus={handleDeleteStatus}
-        onReorderStatuses={handleReorderStatuses}
-        setIsMobileMenuOpen={setIsMobileMenuOpen}
-      />
+      {appView === 'today' ? (
+        <TodayView
+          folders={folders}
+          onUpdateTask={handleUpdateTask}
+          onNavigateToTask={handleNavigateToTask}
+          setIsMobileMenuOpen={setIsMobileMenuOpen}
+        />
+      ) : (
+        <MainContent
+          folder={getActiveFolder()}
+          list={getActiveList()}
+          onUpdateList={handleUpdateList}
+          onDeleteList={handleDeleteList}
+          onCreateTask={handleCreateTask}
+          onUpdateTask={handleUpdateTask}
+          onDeleteTask={handleDeleteTask}
+          onChangeListView={handleChangeListView}
+          onCreateStatus={handleCreateStatus}
+          onUpdateStatus={handleUpdateStatus}
+          onDeleteStatus={handleDeleteStatus}
+          onReorderStatuses={handleReorderStatuses}
+          setIsMobileMenuOpen={setIsMobileMenuOpen}
+        />
+      )}
     </div>
   );
 }
