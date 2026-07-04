@@ -87,7 +87,7 @@ export default function AppHeader({ className, children }: AppHeaderProps) {
 
           <div className='flex items-center gap-3 ml-1'>
             <Link
-              href='https://github.com/Abdelkaderbzz/taskly/tree/develop'
+              href='https://github.com/Abdelkaderbzz/chronomanager'
               target='_blank'
               rel='noopener noreferrer'
               className='text-muted-foreground hover:text-amber-500 transition-colors'

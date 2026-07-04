@@ -1,215 +1,129 @@
 # ChronoManager
 
 <div align="center">
-  <img src="public/favicon.svg" alt="ChronoManager Logo" width="300" />
-  
-  <p><em>An intuitive task management app featuring folders, lists, drag-and-drop, and three powerful views</em></p>
+  <img src="public/chronomanager-logo.svg" alt="ChronoManager Logo" width="120" />
+
+  <p><em>Task management, focus timer, and role-based templates — all in your browser.</em></p>
+
+  <p>
+    <a href="https://chronomanager.netlify.app">Live demo</a>
+    ·
+    <a href="https://github.com/Abdelkaderbzz/chronomanager">GitHub</a>
+  </p>
 </div>
 
-## 🚀 Overview
+## Overview
 
-ChronoManager is a modern task management application built with Next.js and React that helps you organize your work and personal projects. With its intuitive interface and powerful features, ChronoManager makes it easy to keep track of your tasks and stay productive.
+ChronoManager is a free productivity app built with Next.js. Organize work in folders and lists, switch between Kanban / checklist / priority views, track due dates with a Today view, and stay focused with a pomodoro timer and plant gamification.
 
-## ✨ Features
+All data is stored locally in your browser — no account required.
 
-- **Multiple Organizational Views**:
+## Features
 
-  - 📊 **Kanban Board**: Visualize task flow and progress
-  - ✅ **Checklist View**: Simple, focused task completion
-  - 📈 **Priority Table**: Sort tasks by importance and urgency
+### Task organization
+- **Folders & lists** with tags, favorites, and drag-and-drop reordering
+- **Three views**: Kanban board, checklist, priority table
+- **Custom statuses** per list (emoji, color, order)
+- **Global search** across all tasks
+- **Today view** — overdue, due today, and upcoming tasks in one place
 
-- **Advanced Organization**:
+### Role-based templates
+Pick a template on first launch and start with a pre-built workspace:
+- Developer · Marketer · Student · Designer · Freelancer · Blank slate
 
-  - 📁 Create folders to separate work, personal, and project tasks
-  - 📝 Organize tasks into lists within folders
-  - 🏷️ Add tags to categorize tasks further
+Each template includes tailored folders, lists, and starter tasks.
 
-- **Interactive UI**:
+### Focus & gamification
+- **Pomodoro timer** with configurable focus/break cycles
+- **Plant growth** — complete sessions to grow from seed to bloom
+- **Focus mode** at `/app/focus` for distraction-free sessions
+- Link pomodoro sessions to specific tasks
 
-  - 🔄 Drag and drop tasks between statuses
-  - 🎨 Customize statuses with colors and emojis
-  - ✨ Beautiful animations and interactive elements
-  - 🖼️ Interactive particle background
+### Data & settings
+- **localStorage** persistence (auto-save)
+- **Export / import** JSON backups
+- **Dark / light theme** toggle
+- **Template switcher** in settings
 
-- **Data Persistence**:
-  - 💾 All task data is saved to localStorage
-  - 🔄 Automatic saving when changes are made
+## Tech stack
 
-## 🛠️ Technology Stack
+- [Next.js 15](https://nextjs.org/) (App Router)
+- [React 19](https://react.dev/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Framer Motion](https://www.framer.com/motion/)
+- [Radix UI](https://www.radix-ui.com/) + shadcn/ui components
 
-- [Next.js](https://nextjs.org/) - React framework
-- [React](https://reactjs.org/) - UI library
-- [Tailwind CSS](https://tailwindcss.com/) - Styling
-- [tsparticles](https://particles.js.org/) - Animated background
-- [UUID](https://github.com/uuidjs/uuid) - Unique IDs generation
-
-## 🏁 Getting Started
+## Getting started
 
 ### Prerequisites
 
-- Node.js (v16 or higher)
-- npm or yarn
+- Node.js 18+
+- pnpm (recommended)
 
-### Installation
+### Install & run
 
-1. Clone the repository:
+```bash
+git clone https://github.com/Abdelkaderbzz/chronomanager.git
+cd chronomanager
+pnpm install
+pnpm dev
+```
 
-   ```bash
-   git clone https://github.com/yourusername/chronomanager.git
-   cd chronomanager
-   ```
+Open [http://localhost:3000](http://localhost:3000).
 
-2. Install dependencies:
+### Production build
 
-   ```bash
-   pnpm install
-   ```
+```bash
+pnpm build
+pnpm start
+```
 
-3. Run the development server:
+> Stop the dev server before running `pnpm build` to avoid `.next` cache conflicts.
 
-   ```bash
-   pnpm run dev
-   ```
+### Environment variables
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `NEXT_PUBLIC_SITE_URL` | Canonical site URL for SEO | `https://chronomanager.netlify.app` |
 
-## 🧩 Project Structure
+## Project structure
 
 ```
 chronomanager/
-├── app/                  # Next.js app directory
-│   ├── layout.tsx        # Root layout with metadata
-│   └── page.tsx          # Main entry point
-├── components/           # React components
-│   ├── app-header.tsx    # App header with logo
-│   ├── animated-background.tsx # Particle animation
-│   ├── folder-list-system.tsx  # Core task system
-│   ├── enhanced-sidebar.tsx    # Sidebar navigation
-│   ├── main-content.tsx        # Main content area
-│   ├── task-manager.tsx        # Task manager component
-│   ├── views/                  # Task view components
-│   └── ui/                     # UI components
-├── public/               # Static assets
-└── types/                # TypeScript type definitions
+├── app/                      # Next.js routes
+│   ├── page.tsx              # Landing page
+│   ├── app/                  # Task workspace
+│   │   ├── page.tsx          # Main app shell
+│   │   └── focus/            # Pomodoro focus mode
+│   ├── layout.tsx            # Root layout + SEO metadata
+│   ├── robots.ts             # robots.txt
+│   └── sitemap.ts            # sitemap.xml
+├── components/
+│   ├── landing/              # Marketing landing page
+│   ├── templates/            # Role template picker
+│   ├── pomodoro/             # Timer, plant, focus UI
+│   ├── views/                # Kanban, checklist, priority, today
+│   └── ui/                   # shadcn/ui primitives
+├── lib/
+│   ├── templates/            # Template data & workspace builder
+│   ├── site-config.ts        # SEO & site metadata
+│   └── task-dates.ts         # Today view date helpers
+├── hooks/                    # React hooks (pomodoro, toast, etc.)
+└── types/                    # TypeScript definitions
 ```
 
-## 🎮 Customization
+## Routes
 
-### App Header and Styling
+| Route | Description |
+|-------|-------------|
+| `/` | Landing page |
+| `/app` | Task workspace (template picker on first visit) |
+| `/app/focus` | Full-screen pomodoro focus mode |
 
-The app header uses a modern design with animated elements. You can customize it by modifying the `app-header.tsx` file:
+## License
 
-```tsx
-// components/app-header.tsx
-<header
-  className={cn(
-    'sticky top-0 z-30 transition-all duration-300 backdrop-blur-sm',
-    scrolled
-      ? 'shadow-md bg-white/80 dark:bg-black/80'
-      : 'bg-white/95 dark:bg-black/95',
-    className
-  )}
->
-  {/* Header content */}
-</header>
-```
+MIT
 
-The gradient title can be customized by changing the gradient colors:
+## Author
 
-```tsx
-<span className='text-xl font-bold leading-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600'>
-  ChronoManager
-</span>
-```
-
-### Animated Background
-
-The animated background uses tsParticles to create an interactive particle effect. You can customize the background by modifying the `animated-background.tsx` file:
-
-```tsx
-// components/animated-background.tsx
-export default function AnimatedBackground() {
-  // ...
-  return (
-    <div className='fixed inset-0 -z-10'>
-      <Particles
-        options={{
-          // Customize particles here
-          particles: {
-            color: {
-              value: '#6366f1', // Change color
-            },
-            number: {
-              value: 30, // Change density
-            },
-            // More options...
-          },
-        }}
-      />
-    </div>
-  );
-}
-```
-
-Common customizations:
-
-- Change particle colors: Set `particles.color.value` to a color string or array of colors
-- Adjust particle count: Modify `particles.number.value`
-- Change particle size: Adjust `particles.size.value`
-- Modify animation speed: Set `particles.move.speed`
-
-### Theme Colors
-
-The app uses Tailwind CSS for styling. You can customize the color scheme by modifying the `globals.css` file:
-
-```css
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
-    /* More variables... */
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    /* Customize colors here */
-  }
-}
-```
-
-## 🎨 Screenshots
-
-<div align="center">
-  <img src="public/project-img1.png" alt="ChronoManager Logo" width="300" />
-  </br>
-  </br>
-  </br>
-  <img src="public/project-img2.png" alt="ChronoManager Logo" width="300" />
-  </br>
-  </br>
-  </br>
-  <img src="public/project-img3.png" alt="ChronoManager Logo" width="300" />
-
-</div>
-
-## 🚧 Future Improvements
-
-- [ ] User authentication and cloud syncing
-- [ ] Dark/light theme toggle
-- [ ] Mobile app with offline capabilities
-- [ ] Calendar integration
-- [ ] Recurring tasks
-- [ ] Notifications and reminders
-- [ ] Team collaboration features
-
-## 📝 License
-
-[MIT](LICENSE)
-
-## 👤 Author
-
-- [Abdelkader Bouzomita](https://www.linkedin.com/in/bouzomita-abdelkader-928953234/)
-
----
-
-<div align="center">
-  <p>Made with ❤️ for better productivity</p>
-</div>
+[Abdelkader Bouzomita](https://abdelkader.work) · [LinkedIn](https://www.linkedin.com/in/bouzomita-abdelkader-928953234/)
