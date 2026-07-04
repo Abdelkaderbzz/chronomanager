@@ -460,8 +460,10 @@ export default function EnhancedSidebar({
                   )}
                   onClick={() => handleSelectFolder(folder.id)}
                 >
-                  <span className='mr-2' style={{ color: folder.color }}>
-                    {folder.icon}
+                  <span className='mr-2 inline-flex h-4 w-4 shrink-0 items-center justify-center text-sm leading-none'>
+                    {folder.icon || (
+                      <Folder className='h-4 w-4' style={{ color: folder.color }} />
+                    )}
                   </span>
                   <span className='truncate'>{folder.name}</span>
                 </Button>
@@ -840,15 +842,18 @@ function FolderItem({
             initial={{ rotate: 0 }}
             animate={{ rotate: isExpanded ? 0 : -10 }}
             transition={{ duration: 0.2 }}
-            className='mr-2'
-            style={{ color: folder.color }}
+            className='mr-2 inline-flex h-4 w-4 shrink-0 items-center justify-center'
+            style={folder.icon ? undefined : { color: folder.color }}
           >
-            {isExpanded ? (
+            {folder.icon ? (
+              <span className='text-sm leading-none' aria-hidden>
+                {folder.icon}
+              </span>
+            ) : isExpanded ? (
               <FolderOpen className='h-4 w-4' />
             ) : (
               <Folder className='h-4 w-4' />
             )}
-            {folder.icon}
           </motion.span>
           <span className='truncate'>{folder.name}</span>
         </Button>

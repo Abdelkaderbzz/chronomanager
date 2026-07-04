@@ -1,12 +1,13 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import {
   Download,
   Upload,
   Settings,
   Trash2,
   BarChart3,
+  LayoutTemplate,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -29,12 +30,16 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
+import { getTemplateById } from '@/lib/templates/data';
+import { TEMPLATE_STORAGE_KEY } from '@/lib/templates/constants';
+import type { TemplateId } from '@/types/templates';
 import type { Folder } from '@/types/types';
 
 interface AppSettingsProps {
   folders: Folder[];
   onImport: (folders: Folder[]) => void;
   onClearAll: () => void;
+  onChangeTemplate: () => void;
 }
 
 function getStats(folders: Folder[]) {
@@ -81,11 +86,25 @@ function getStats(folders: Folder[]) {
   return { totalLists, totalTasks, completedTasks, overdueTasks };
 }
 
-export function AppSettings({ folders, onImport, onClearAll }: AppSettingsProps) {
+export function AppSettings({
+  folders,
+  onImport,
+  onClearAll,
+  onChangeTemplate,
+}: AppSettingsProps) {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [showTemplateConfirm, setShowTemplateConfirm] = useState(false);
+  const [currentTemplate, setCurrentTemplate] = useState<ReturnType<typeof getTemplateById> | null>(null);
   const stats = getStats(folders);
+
+  useEffect(() => {
+    const savedTemplateId = localStorage.getItem(TEMPLATE_STORAGE_KEY) as TemplateId | null;
+    if (savedTemplateId) {
+      setCurrentTemplate(getTemplateById(savedTemplateId));
+    }
+  }, [folders]);
 
   const handleExport = () => {
     const data = {
@@ -172,7 +191,25 @@ export function AppSettings({ folders, onImport, onClearAll }: AppSettingsProps)
             </p>
           )}
 
+          {currentTemplate && (
+            <div className='rounded-lg border bg-muted/40 p-3 flex items-center gap-3'>
+              <span className='text-xl'>{currentTemplate.icon}</span>
+              <div className='min-w-0'>
+                <p className='text-xs text-muted-foreground'>Active template</p>
+                <p className='text-sm font-medium truncate'>{currentTemplate.label}</p>
+              </div>
+            </div>
+          )}
+
           <div className='flex flex-col gap-2 pt-2'>
+            <Button
+              variant='outline'
+              className='justify-start gap-2'
+              onClick={() => setShowTemplateConfirm(true)}
+            >
+              <LayoutTemplate className='h-4 w-4' />
+              Change workspace template
+            </Button>
             <Button variant='outline' className='justify-start gap-2' onClick={handleExport}>
               <Download className='h-4 w-4' />
               Export backup (JSON)
@@ -220,10 +257,40 @@ export function AppSettings({ folders, onImport, onClearAll }: AppSettingsProps)
               onClick={() => {
                 onClearAll();
                 setShowClearConfirm(false);
-                toast({ title: 'All data cleared', description: 'Your workspace has been reset.' });
+                toast({
+                  title: 'All data cleared',
+                  description: 'Choose a template to set up your new workspace.',
+                });
               }}
             >
               Clear everything
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={showTemplateConfirm} onOpenChange={setShowTemplateConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Change workspace template?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will replace your current folders, lists, and tasks with a fresh
+              template. Export a backup first if you want to keep your data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                onChangeTemplate();
+                setShowTemplateConfirm(false);
+                toast({
+                  title: 'Choose your template',
+                  description: 'Pick a role to set up your new workspace.',
+                });
+              }}
+            >
+              Choose template
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
