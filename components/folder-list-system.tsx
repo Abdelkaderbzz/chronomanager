@@ -29,7 +29,6 @@ export default function FolderListSystem({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
 
-  // Load data from localStorage on component mount
   useEffect(() => {
     const savedFolders = localStorage.getItem('folders');
     const savedActiveFolder = localStorage.getItem('activeFolder');
@@ -39,7 +38,6 @@ export default function FolderListSystem({
     if (savedFolders) {
       const parsedFolders = JSON.parse(savedFolders);
 
-      // Add isFavorite property if it doesn't exist
       const foldersWithFavorites = parsedFolders.map((folder: any) => ({
         ...folder,
         isFavorite: folder.isFavorite || false,
@@ -51,7 +49,6 @@ export default function FolderListSystem({
 
       setFolders(foldersWithFavorites);
 
-      // Set active folder and list if they exist
       if (
         savedActiveFolder &&
         foldersWithFavorites.some(
@@ -72,14 +69,12 @@ export default function FolderListSystem({
           }
         }
       } else if (foldersWithFavorites.length > 0) {
-        // Set first folder as active if no active folder is saved
         setActiveFolder(foldersWithFavorites[0].id);
         if (foldersWithFavorites[0].lists.length > 0) {
           setActiveList(foldersWithFavorites[0].lists[0].id);
         }
       }
     } else {
-      // No saved data — template picker in app-shell handles workspace setup
       setFolders([]);
     }
 
@@ -88,7 +83,6 @@ export default function FolderListSystem({
     }
   }, []);
 
-  // Handle navigation from global search
   useEffect(() => {
     if (navTarget) {
       setAppView('list');
@@ -99,7 +93,6 @@ export default function FolderListSystem({
     }
   }, [navTarget, onNavTargetHandled]);
 
-  // Save data to localStorage whenever it changes
   useEffect(() => {
     if (folders.length > 0) {
       localStorage.setItem('folders', JSON.stringify(folders));
@@ -116,7 +109,6 @@ export default function FolderListSystem({
     localStorage.setItem('activeAppView', appView);
   }, [folders, activeFolder, activeList, appView]);
 
-  // Notify parent of folder changes for search/settings
   useEffect(() => {
     if (folders.length > 0) {
       onFoldersChange?.(folders);

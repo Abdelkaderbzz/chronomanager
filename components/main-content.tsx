@@ -33,7 +33,6 @@ import { Menu, KanbanIcon as LayoutKanban, CheckSquare, BarChart3, Plus, Pencil,
 import { StatusManager } from "@/components/status-manager"
 import type { Status } from "@/types/types"
 
-// Update the MainContentProps interface to include status management functions
 interface MainContentProps {
   folder: Folder | null
   list: List | null
@@ -50,7 +49,6 @@ interface MainContentProps {
   setIsMobileMenuOpen: (isOpen: boolean) => void
 }
 
-// Update the MainContent component to include status management
 export default function MainContent({
   folder,
   list,
@@ -122,7 +120,6 @@ export default function MainContent({
     setShowAddTask(false)
   }
 
-  // Add renderListView function to pass status management functions to views
   const renderListView = () => {
     if (!folder || !list) return null
 
@@ -178,7 +175,6 @@ export default function MainContent({
     )
   }
 
-  // Add status manager button to the header
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden">
       <div className="border-b p-4 flex items-center justify-between">
