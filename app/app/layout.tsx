@@ -1,11 +1,12 @@
-'use client';
+import { PomodoroAppProvider } from '@/components/pomodoro/pomodoro-app-provider';
+import { appMetadata } from '@/lib/site-config';
 
-import { PomodoroProvider } from '@/hooks/use-pomodoro';
+export const metadata = appMetadata;
 
 export default function AppLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <PomodoroProvider>{children}</PomodoroProvider>;
+  return <PomodoroAppProvider>{children}</PomodoroAppProvider>;
 }
